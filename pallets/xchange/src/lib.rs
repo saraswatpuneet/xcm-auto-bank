@@ -12,6 +12,7 @@ use frame_support::{
 	traits::{BalanceStatus::Free, Currency, Get, ReservableCurrency},
 };
 pub use pallet::*;
+use frame_support::traits::OnKilledAccount;
 use pallet_common::*;
 use scale_info::TypeInfo;
 use sp_std::prelude::*;
@@ -77,10 +78,10 @@ pub mod pallet {
 	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
 	#[scale_info(skip_type_params(T))]
 	pub struct DeviceProfile<T: Config> {
-        penalty: BalanceOf<T>,
-        work_duration: MomentOf<T>,
-        para_id: ParaId,
-        device_state: DeviceState,
+        pub penalty: BalanceOf<T>,
+        pub work_duration: MomentOf<T>,
+        pub para_id: ParaId,
+        pub device_state: DeviceState,
     }
 
 	#[pallet::pallet]
@@ -129,5 +130,22 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {
+    }
+}
 
+impl<T: Config> OnKilledAccount<T::AccountId> for Pallet<T> {
+    /// The account with the given id was reaped.
+    fn on_killed_account(who: &T::AccountId) {
+        //Timewait
+        if let Some(mut dev) = Device::<T>::get(who) {
+            if dev.device_state == DeviceState::Off {
+                Device::<T>::remove(who);
+            } else {
+                dev.device_state = DeviceState::Timewait;
+                Device::<T>::insert(who, dev);
+            }
+        }
+    }
 }
