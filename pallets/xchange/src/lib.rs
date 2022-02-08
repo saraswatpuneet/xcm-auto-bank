@@ -11,41 +11,42 @@ use frame_support::{
 	sp_runtime::RuntimeDebug,
 	traits::{BalanceStatus::Free, Currency, Get, ReservableCurrency},
 };
-pub use pallet::*;
+use xcm::latest::{prelude::*, Junction, MultiLocation, OriginKind, SendXcm, Xcm};
+
 use frame_support::traits::OnKilledAccount;
+pub use pallet::*;
 use pallet_common::*;
 use scale_info::TypeInfo;
 use sp_std::prelude::*;
-use xcm::v0::{Junction, OriginKind, SendXcm, Xcm};
 
 #[cfg(feature = "std")]
 use frame_support::serde::{Deserialize, Serialize};
 use sp_std::convert::{TryFrom, TryInto};
 
-use cumulus_primitives_core::{relay_chain, ParaId, XcmpMessageHandler, ServiceQuality};
+use cumulus_primitives_core::{relay_chain, ParaId, ServiceQuality, XcmpMessageHandler};
 
 use xcm::VersionedXcm;
 
 type XCMPMessageOf<T> = XCMPMessage<
-    <T as frame_system::Config>::AccountId,
-    BalanceOf<T>,
-    <T as Config>::OrderPayload,
-    <T as pallet_timestamp::Config>::Moment,
+	<T as frame_system::Config>::AccountId,
+	BalanceOf<T>,
+	<T as Config>::OrderPayload,
+	<T as pallet_timestamp::Config>::Moment,
 >;
 
 pub(crate) type OrderBaseOf<T> = OrderBase<
-    <T as Config>::OrderPayload,
-    BalanceOf<T>,
-    MomentOf<T>,
-    <T as frame_system::Config>::AccountId,
+	<T as Config>::OrderPayload,
+	BalanceOf<T>,
+	MomentOf<T>,
+	<T as frame_system::Config>::AccountId,
 >;
 
 pub(crate) type OrderOf<T> = Order<
-    <T as Config>::OrderPayload,
-    BalanceOf<T>,
-    MomentOf<T>,
-    <T as frame_system::Config>::AccountId,
-    ParaId,
+	<T as Config>::OrderPayload,
+	BalanceOf<T>,
+	MomentOf<T>,
+	<T as frame_system::Config>::AccountId,
+	ParaId,
 >;
 
 pub type BalanceOf<T> =
@@ -68,25 +69,24 @@ pub mod pallet {
 
 		type Currency: ReservableCurrency<Self::AccountId>;
 
-        type OrderPayload: Encode + Decode + Clone + Default + Parameter + MaxEncodedLen + TypeInfo;
+		type OrderPayload: Encode + Decode + Clone + Default + Parameter + MaxEncodedLen + TypeInfo;
 
-        type XcmpMessageSender: SendXcm;
-
+		type XcmpMessageSender: SendXcm;
 	}
 
 	// Struct for holding device information.
 	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
 	#[scale_info(skip_type_params(T))]
 	pub struct DeviceProfile<T: Config> {
-        pub penalty: BalanceOf<T>,
-        pub work_duration: MomentOf<T>,
-        pub para_id: ParaId,
-        pub device_state: DeviceState,
-    }
+		pub penalty: BalanceOf<T>,
+		pub work_duration: MomentOf<T>,
+		pub para_id: ParaId,
+		pub device_state: DeviceState,
+	}
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-    #[pallet::without_storage_info]
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	/// Device profiles
@@ -97,55 +97,78 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn orders)]
-	pub type Orders<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, OrderOf<T>, OptionQuery>;
-
+	pub type Orders<T: Config> = StorageMap<_, Twox64Concat, T::AccountId, OrderOf<T>, OptionQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-        NewDevice(T::AccountId),
-        NewOrder(T::AccountId, T::AccountId),
-        Accept(T::AccountId, T::AccountId),
-        Reject(T::AccountId, T::AccountId),
-        Done(T::AccountId, T::AccountId),
-        BadVersion(<T as frame_system::Config>::Hash),
+		NewDevice(T::AccountId),
+		NewOrder(T::AccountId, T::AccountId),
+		Accept(T::AccountId, T::AccountId),
+		Reject(T::AccountId, T::AccountId),
+		Done(T::AccountId, T::AccountId),
+		BadVersion(<T as frame_system::Config>::Hash),
 	}
 
 	// Errors inform users that something went wrong.
 	#[pallet::error]
 	pub enum Error<T> {
-        NoneValue,
-        OrderExists,
-        IllegalState,
-        Overdue,
-        DeviceLowBail,
-        DeviceExists,
-        BadOrderDetails,
-        NoDevice,
-        NoOrder,
-        Prohibited,
-        CannotReachDestination,
+		NoneValue,
+		OrderExists,
+		IllegalState,
+		Overdue,
+		DeviceLowBail,
+		DeviceExists,
+		BadOrderDetails,
+		NoDevice,
+		NoOrder,
+		Prohibited,
+		CannotReachDestination,
 	}
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
-    #[pallet::call]
-    impl<T: Config> Pallet<T> {
-    }
+	#[pallet::call]
+	impl<T: Config> Pallet<T> {
+		#[pallet::weight(10_000)]
+		pub fn test(origin: OriginFor<T>) -> DispatchResult {
+            Ok(())
+        }
+        #[pallet::weight(10_000)]
+        pub fn order(origin: OriginFor<T>, order: OrderBaseOf<T>) -> DispatchResult {
+            Ok(())
+        }
+
+        #[pallet::weight(10_000)]
+        pub fn cancel(origin: OriginFor<T>, device: T::AccountId) -> DispatchResult {
+            Ok(())
+        }
+        
+        #[pallet::weight(10_000)]
+        pub fn register(
+            origin: OriginFor<T>,
+            paraid: ParaId,
+            penalty: BalanceOf<T>,
+            wcd: MomentOf<T>,
+            onoff: bool,
+        ) -> DispatchResult {
+            Ok(())
+        }
+        
+	}
 }
 
 impl<T: Config> OnKilledAccount<T::AccountId> for Pallet<T> {
-    /// The account with the given id was reaped.
-    fn on_killed_account(who: &T::AccountId) {
-        //Timewait
-        if let Some(mut dev) = Device::<T>::get(who) {
-            if dev.device_state == DeviceState::Off {
-                Device::<T>::remove(who);
-            } else {
-                dev.device_state = DeviceState::Timewait;
-                Device::<T>::insert(who, dev);
-            }
-        }
-    }
+	/// The account with the given id was reaped.
+	fn on_killed_account(who: &T::AccountId) {
+		//Timewait
+		if let Some(mut dev) = Device::<T>::get(who) {
+			if dev.device_state == DeviceState::Off {
+				Device::<T>::remove(who);
+			} else {
+				dev.device_state = DeviceState::Timewait;
+				Device::<T>::insert(who, dev);
+			}
+		}
+	}
 }
