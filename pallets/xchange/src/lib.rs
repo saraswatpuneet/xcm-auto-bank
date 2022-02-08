@@ -21,14 +21,23 @@ use xcm::v0::{Junction, OriginKind, SendXcm, Xcm};
 use frame_support::serde::{Deserialize, Serialize};
 use sp_std::convert::{TryFrom, TryInto};
 
-use cumulus_primitives_core::{relay_chain, ParaId};
+use cumulus_primitives_core::{relay_chain, ParaId, XcmpMessageHandler, ServiceQuality};
+
 use xcm::VersionedXcm;
 
-pub type BalanceOf<T> =
-	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-pub type MomentOf<T> = <T as pallet_timestamp::Config>::Moment;
+type XCMPMessageOf<T> = XCMPMessage<
+    <T as frame_system::Config>::AccountId,
+    BalanceOf<T>,
+    <T as Config>::OrderPayload,
+    <T as pallet_timestamp::Config>::Moment,
+>;
 
-type Timestamp<T> = pallet_timestamp::Pallet<T>;
+pub(crate) type OrderBaseOf<T> = OrderBase<
+    <T as Config>::OrderPayload,
+    BalanceOf<T>,
+    MomentOf<T>,
+    <T as frame_system::Config>::AccountId,
+>;
 
 pub(crate) type OrderOf<T> = Order<
     <T as Config>::OrderPayload,
@@ -37,6 +46,12 @@ pub(crate) type OrderOf<T> = Order<
     <T as frame_system::Config>::AccountId,
     ParaId,
 >;
+
+pub type BalanceOf<T> =
+	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+pub type MomentOf<T> = <T as pallet_timestamp::Config>::Moment;
+
+type Timestamp<T> = pallet_timestamp::Pallet<T>;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -53,6 +68,8 @@ pub mod pallet {
 		type Currency: ReservableCurrency<Self::AccountId>;
 
         type OrderPayload: Encode + Decode + Clone + Default + Parameter + MaxEncodedLen + TypeInfo;
+
+        type XcmpMessageSender: SendXcm;
 
 	}
 
@@ -112,4 +129,5 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+
 }
