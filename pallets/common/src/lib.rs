@@ -1,5 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-use codec::{Decode, Encode};
+use codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 
 use frame_support::{
@@ -9,7 +9,7 @@ use frame_support::{
 };
 
 #[cfg_attr(feature = "std", derive(Debug))]
-#[derive(Encode, Decode, PartialEq, TypeInfo)]
+#[derive(Encode, Decode, PartialEq, TypeInfo, MaxEncodedLen, Clone)]
 pub enum DeviceState {
     /// Device is off
     Off,
