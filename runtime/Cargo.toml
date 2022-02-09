@@ -24,6 +24,8 @@ smallvec = "1.6.1"
 
 # Local Dependencies
 pallet-template = { path = "../pallets/template", default-features = false }
+#pallet-xchange = { path = "../pallets/xchange", default-features = false }
+#pallet-xchange-service = { path = "../pallets/xchange-service", default-features = false }
 
 # Substrate Dependencies
 ## Substrate Primitive Dependencies

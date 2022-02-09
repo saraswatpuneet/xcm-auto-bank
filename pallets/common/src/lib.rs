@@ -3,9 +3,7 @@ use codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 
 use frame_support::{
-    sp_runtime::traits::Hash,
     sp_runtime::RuntimeDebug,
-    traits::{BalanceStatus::Free, Currency, Get, ReservableCurrency},
 };
 
 #[cfg_attr(feature = "std", derive(Debug))]
