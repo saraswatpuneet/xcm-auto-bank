@@ -1,32 +1,29 @@
 [package]
 name = "pallet-xchange-service"
 authors = ["Anonymous"]
-description = "FRAME pallet template for defining custom asset xchange service."
+description = "FRAME pallet template for defining custom runtime logic."
 version = "0.1.0"
 license = "Unlicense"
 homepage = "https://substrate.io"
 repository = "https://github.com/paritytech/substrate/"
 edition = "2021"
 
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
 [dependencies]
-codec = { package = "parity-scale-codec", version = "2.2", default-features = false, features = ["derive", "max-encoded-len"] }
-scale-info = { version = "1.0", default-features = false, features = ["derive", "serde", "decode"] }
+codec = { package = "parity-scale-codec", version = "2.0.0", features = ["derive"], default-features = false }
+scale-info = { version = "1.0.0", default-features = false, features = ["derive"] }
 log = { version = "0.4.14", default-features = false }
-pallet-timestamp = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
-
-#Local
-pallet-common = {path = "../../pallets/common", version = "0.1.0", default-features = false}
-
-# Substrate
 sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
-frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
-frame-system = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
-frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false, optional = true }
-sp-arithmetic = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
-pallet-assets = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
-pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
 
-# Polkadot
+frame-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true , branch = "polkadot-v0.9.16" }
+frame-support = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.16" }
+frame-system = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.16" }
+## Substrate Pallet Dependencies
+pallet-timestamp = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.16" }
+
+# XCM dependencies
 xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.16" }
 xcm-executor = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.16" }
 xcm-builder = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.16" }
@@ -44,34 +41,31 @@ cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/cumulus", bra
 cumulus-pallet-xcm = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.16" }
 cumulus-primitives-utility = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.16" }
 
+pallet-common = {path ="../../pallets/common", default-features = false}
+
 [dev-dependencies]
 serde = { version = "1.0.132" }
 sp-core = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.16" }
 sp-runtime = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.16" }
 sp-io = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.16" }
 
-assert_matches = "1.4.0"
-hex-literal = "0.3"
-
 [features]
 default = ["std"]
+runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks"]
 std = [
 	"codec/std",
 	"scale-info/std",
 	"log/std",
 	"sp-std/std",
-	"sp-runtime/std",
-	"sp-io/std",
-	"sp-core/full_crypto",
-	"sp-arithmetic/std",
 	"frame-support/std",
 	"frame-system/std",
 	"frame-benchmarking/std",
+	"pallet-timestamp/std",
 	"cumulus-primitives-core/std",
 	"cumulus-primitives-utility/std",
 	"cumulus-pallet-xcm/std",
 	"xcm/std",
 	"xcm-executor/std",
 	"xcm-builder/std",
-	"pallet-balances/std",
 ]
+try-runtime = [ "frame-support/try-runtime" ]

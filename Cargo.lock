@@ -4593,19 +4593,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-assets"
-version = "4.0.0-dev"
-source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.16#4aeb95f7f38fcd519e2628f32f79044a8fef99d5"
-dependencies = [
- "frame-support",
- "frame-system",
- "parity-scale-codec",
- "scale-info",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
 name = "pallet-aura"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.16#4aeb95f7f38fcd519e2628f32f79044a8fef99d5"
@@ -4805,15 +4792,15 @@ dependencies = [
 name = "pallet-common"
 version = "0.1.0"
 dependencies = [
- "assert_matches",
- "cumulus-primitives-core",
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
- "hex-literal",
  "parity-scale-codec",
- "polkadot-primitives",
  "scale-info",
- "xcm",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
 ]
 
 [[package]]
@@ -5366,19 +5353,16 @@ dependencies = [
 name = "pallet-xchange"
 version = "0.1.0"
 dependencies = [
- "assert_matches",
  "cumulus-pallet-dmp-queue",
  "cumulus-pallet-parachain-system",
  "cumulus-pallet-xcm",
  "cumulus-pallet-xcmp-queue",
  "cumulus-primitives-core",
  "cumulus-primitives-utility",
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
- "hex-literal",
  "log",
- "pallet-assets",
- "pallet-balances",
  "pallet-common",
  "pallet-timestamp",
  "pallet-xcm",
@@ -5402,7 +5386,6 @@ dependencies = [
 name = "pallet-xchange-service"
 version = "0.1.0"
 dependencies = [
- "assert_matches",
  "cumulus-pallet-dmp-queue",
  "cumulus-pallet-parachain-system",
  "cumulus-pallet-xcm",
@@ -5412,10 +5395,7 @@ dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "hex-literal",
  "log",
- "pallet-assets",
- "pallet-balances",
  "pallet-common",
  "pallet-timestamp",
  "pallet-xcm",
@@ -5425,7 +5405,6 @@ dependencies = [
  "polkadot-runtime-parachains",
  "scale-info",
  "serde",
- "sp-arithmetic",
  "sp-core",
  "sp-io",
  "sp-runtime",
@@ -10272,7 +10251,7 @@ dependencies = [
  "chrono",
  "lazy_static",
  "matchers",
- "parking_lot 0.11.2",
+ "parking_lot 0.10.2",
  "regex",
  "serde",
  "serde_json",

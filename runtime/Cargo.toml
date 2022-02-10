@@ -130,6 +130,8 @@ std = [
 	"xcm-builder/std",
 	"xcm-executor/std",
 	"xcm/std",
+	#"pallet-xchange/std",
+	#"pallet-xchange-service/std",
 ]
 
 runtime-benchmarks = [
