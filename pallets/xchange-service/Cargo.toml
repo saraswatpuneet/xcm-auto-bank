@@ -15,33 +15,20 @@ targets = ["x86_64-unknown-linux-gnu"]
 codec = { package = "parity-scale-codec", version = "2.0.0", features = ["derive"], default-features = false }
 scale-info = { version = "1.0.0", default-features = false, features = ["derive"] }
 log = { version = "0.4.14", default-features = false }
-sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
 
-frame-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true , branch = "polkadot-v0.9.16" }
+sp-std = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.16", default-features = false }
 frame-support = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.16" }
-frame-system = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.16" }
+
 ## Substrate Pallet Dependencies
 pallet-timestamp = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.16" }
 
+pallet-common = {path ="../../pallets/common", default-features = false}
+
 # XCM dependencies
 xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.16" }
-xcm-executor = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.16" }
-xcm-builder = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.16" }
-polkadot-parachain = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.16" }
-pallet-xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.16" }
-polkadot-runtime-parachains = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.16" }
-xcm-simulator = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.16" }
-polkadot-runtime-common = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.16" }
 
 # Cumulus
 cumulus-primitives-core = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.16" }
-cumulus-pallet-parachain-system = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.16" }
-cumulus-pallet-dmp-queue = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.16" }
-cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.16" }
-cumulus-pallet-xcm = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.16" }
-cumulus-primitives-utility = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.16" }
-
-pallet-common = {path ="../../pallets/common", default-features = false}
 
 [dev-dependencies]
 serde = { version = "1.0.132" }
@@ -51,21 +38,14 @@ sp-io = { git = "https://github.com/paritytech/substrate", default-features = fa
 
 [features]
 default = ["std"]
-runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks"]
+
 std = [
 	"codec/std",
 	"scale-info/std",
 	"log/std",
-	"sp-std/std",
+	"sp-std/std",	
 	"frame-support/std",
-	"frame-system/std",
-	"frame-benchmarking/std",
-	"pallet-timestamp/std",
 	"cumulus-primitives-core/std",
-	"cumulus-primitives-utility/std",
-	"cumulus-pallet-xcm/std",
 	"xcm/std",
-	"xcm-executor/std",
-	"xcm-builder/std",
 ]
-try-runtime = [ "frame-support/try-runtime" ]
+
