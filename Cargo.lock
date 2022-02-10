@@ -5352,23 +5352,12 @@ dependencies = [
 name = "pallet-xchange"
 version = "0.1.0"
 dependencies = [
- "cumulus-pallet-dmp-queue",
- "cumulus-pallet-parachain-system",
- "cumulus-pallet-xcm",
- "cumulus-pallet-xcmp-queue",
  "cumulus-primitives-core",
- "cumulus-primitives-utility",
- "frame-benchmarking",
  "frame-support",
- "frame-system",
  "log",
  "pallet-common",
  "pallet-timestamp",
- "pallet-xcm",
  "parity-scale-codec",
- "polkadot-parachain",
- "polkadot-runtime-common",
- "polkadot-runtime-parachains",
  "scale-info",
  "serde",
  "sp-core",
@@ -5376,32 +5365,18 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "xcm",
- "xcm-builder",
- "xcm-executor",
- "xcm-simulator",
 ]
 
 [[package]]
 name = "pallet-xchange-service"
 version = "0.1.0"
 dependencies = [
- "cumulus-pallet-dmp-queue",
- "cumulus-pallet-parachain-system",
- "cumulus-pallet-xcm",
- "cumulus-pallet-xcmp-queue",
  "cumulus-primitives-core",
- "cumulus-primitives-utility",
- "frame-benchmarking",
  "frame-support",
- "frame-system",
  "log",
  "pallet-common",
  "pallet-timestamp",
- "pallet-xcm",
  "parity-scale-codec",
- "polkadot-parachain",
- "polkadot-runtime-common",
- "polkadot-runtime-parachains",
  "scale-info",
  "serde",
  "sp-core",
@@ -5409,9 +5384,6 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "xcm",
- "xcm-builder",
- "xcm-executor",
- "xcm-simulator",
 ]
 
 [[package]]
@@ -10251,7 +10223,7 @@ dependencies = [
  "chrono",
  "lazy_static",
  "matchers",
- "parking_lot 0.10.2",
+ "parking_lot 0.11.2",
  "regex",
  "serde",
  "serde_json",
@@ -11068,23 +11040,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "xcm-simulator"
-version = "0.9.16"
-source = "git+https://github.com/paritytech/polkadot?branch=release-v0.9.16#41ab002d7451766324a9f314fee11c9c53314350"
-dependencies = [
- "frame-support",
- "parity-scale-codec",
- "paste",
- "polkadot-core-primitives",
- "polkadot-parachain",
- "polkadot-runtime-parachains",
- "sp-io",
- "sp-std",
- "xcm",
- "xcm-executor",
 ]
 
 [[package]]
