@@ -4,7 +4,7 @@
 /// Edit this file to define custom logic or remove it if it is not needed.
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// <https://docs.substrate.io/v3/runtime/frame>
-use codec::{Decode, Encode, MaxEncodedLen};
+use codec::{Decode, Encode};
 use frame_support::weights::Weight;
 use frame_support::{
 	dispatch::DispatchResult,
@@ -81,7 +81,7 @@ pub mod pallet {
 
 		type Currency: ReservableCurrency<Self::AccountId>;
 
-		type OrderPayload: Encode + Decode + Clone + Default + Parameter + MaxEncodedLen + TypeInfo;
+		type OrderPayload: Encode + Decode + Clone + Default + Parameter + TypeInfo;
 		type SelfParaId: Get<ParaId>;
 
 		type XcmpMessageSender: SendXcm;
@@ -90,7 +90,7 @@ pub mod pallet {
 	}
 
 	// Struct for holding device information.
-	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]
 	#[scale_info(skip_type_params(T))]
 	pub struct DeviceProfile<T: Config> {
 		pub penalty: BalanceOf<T>,
@@ -100,7 +100,6 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	/// Device profiles
@@ -250,7 +249,7 @@ pub mod pallet {
 						(false, DeviceState::Ready | DeviceState::Off) => DeviceState::Off,
 						//(false, DeviceState::Busy2 | DeviceState::Standby) => DeviceState::Standby,
 						(true, DeviceState::Off) => DeviceState::Ready,
-						(_) => return Err(Error::<T>::IllegalState.into()),
+						_ => return Err(Error::<T>::IllegalState.into()),
 					};
 					Ok(())
 				} else {
