@@ -59,7 +59,9 @@ use xcm_executor::{Config, XcmExecutor};
 
 /// Import the template pallet.
 pub use pallet_template;
-
+pub use pallet_xchange;
+pub use pallet_xchange_service;
+pub use pallet_xchange_service::OrderOf;
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
 
@@ -588,6 +590,31 @@ impl pallet_template::Config for Runtime {
 	type Event = Event;
 }
 
+impl pallet_xchange::Config for Runtime {
+    type Event = Event;
+    type XcmpMessageSender = XcmRouter;
+    type OrderPayload = u64;
+    type Currency = Balances;
+}
+
+pub struct AcceptOnReceive;
+impl<T: pallet_xchange_service::Config> pallet_xchange_service::OnReceived<T> for AcceptOnReceive {
+    fn on_received(
+        device: &<T as frame_system::Config>::AccountId,
+        order: &pallet_xchange_service::OrderOf<T>,
+    ) -> Option<pallet_xchange_service::DeviceState> {
+        Some(pallet_xchange_service::DeviceState::Accepted)
+    }
+}
+
+impl pallet_xchange_service::Config for Runtime {
+    type Event = Event;
+    type XcmpMessageSender = XcmRouter;
+    type OrderPayload = u64;
+    type Currency = Balances;
+    type SelfParaId = parachain_info::Pallet<Runtime>;
+    type OnReceived = AcceptOnReceive;
+}
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -622,6 +649,11 @@ construct_runtime!(
 
 		// Template
 		TemplatePallet: pallet_template::{Pallet, Call, Storage, Event<T>}  = 40,
+
+		XchangePallet: pallet_xchange::{Pallet, Call, Storage, Event<T>}  = 41,
+
+		XchangeService: pallet_xchange_service::{Pallet, Call, Storage, Event<T>}  = 42,
+
 	}
 );
 

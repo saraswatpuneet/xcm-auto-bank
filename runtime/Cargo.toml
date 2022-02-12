@@ -85,6 +85,7 @@ xcm-executor = { git = "https://github.com/paritytech/polkadot", default-feature
 default = [
 	"std",
 ]
+
 std = [
 	"codec/std",
 	"serde",
@@ -112,6 +113,8 @@ std = [
 	"pallet-session/std",
 	"pallet-sudo/std",
 	"pallet-template/std",
+	"pallet-xchange/std",
+	"pallet-xchange-service/std",
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",

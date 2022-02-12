@@ -17,7 +17,7 @@ use xcm::latest::{prelude::*, Junction, MultiLocation, OriginKind, SendXcm, Xcm}
 
 use frame_support::traits::OnKilledAccount;
 pub use pallet::*;
-use pallet_common::*;
+pub use pallet_common::*;
 use scale_info::TypeInfo;
 use sp_std::prelude::*;
 
@@ -46,14 +46,14 @@ type XCMPMessageOf<T> = XCMPMessage<
 	<T as pallet_timestamp::Config>::Moment,
 >;
 
-pub(crate) type OrderBaseOf<T> = OrderBase<
+pub type OrderBaseOf<T> = OrderBase<
 	<T as Config>::OrderPayload,
 	BalanceOf<T>,
 	MomentOf<T>,
 	<T as frame_system::Config>::AccountId,
 >;
 
-pub(crate) type OrderOf<T> = Order<
+pub type OrderOf<T> = Order<
 	<T as Config>::OrderPayload,
 	BalanceOf<T>,
 	MomentOf<T>,
@@ -82,6 +82,7 @@ pub mod pallet {
 		type Currency: ReservableCurrency<Self::AccountId>;
 
 		type OrderPayload: Encode + Decode + Clone + Default + Parameter + TypeInfo;
+		
 		type SelfParaId: Get<ParaId>;
 
 		type XcmpMessageSender: SendXcm;
