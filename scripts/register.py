@@ -12,16 +12,6 @@ bob = Keypair.create_from_uri('//Bob')
 charlie = Keypair.create_from_uri('//Charlie')
 dev = Keypair.create_from_uri('//Device//1')
 
-# Parachain addresses
-
-#  para100  = '5Ec4AhP7HwJNrY2CxEcFSy1BuqAY3qxvCQCfoois983TTxDA'
-#  para200  = '5Ec4AhPTL6nWnUnw58QzjJvFd3QATwHA3UJnvSD4GVSQ7Gop'
-#  para1000 = '5Ec4AhPZk8STuex8Wsi9TwDtJQxKqzPJRCH7348Xtcs9vZLJ'
-
-# Sibling addresses
-
-#  sibl100  = '5Eg2fnsvNfVGz8kMWEZLZcM1AJqqmG22G3r74mFN1r52Ka7S'
-#  sibl200  = '5Eg2fntGQpyQv5X5d8N5qxG4sX5UBMLG77xEBPjZ9DTxxtt7'
 
 CUSTOM_TYPES = {
     "DeviceState": {
@@ -324,10 +314,10 @@ def config_device(app, amount):
     print("transfer")
 
     call = app.compose_call(
-        call_module='ClientModule',
+        call_module='XchangePallet',
         call_function='register',
         call_params={
-            'paraid': 200,
+            'paraid': 2000,
             'penalty': 1000_000_000,
             'wcd': 3600000,
             'onoff': True
@@ -343,24 +333,24 @@ def account_info(app):
     Display typical account balances
     '''
     dev_profile = app.query(
-        module='ClientModule',
+        module='XchangePallet',
         storage_function='Device',
         params=[dev.ss58_address]
     )
 
     print(f"device {dev.ss58_address} {dev_profile} ")
 
-    para100 = get_para_address(app, 100)
-    para200 = get_para_address(app, 200)
+    para100 = get_para_address(app, 2000)
+    para200 = get_para_address(app, 2001)
 
-    sibl100 = get_para_address(app, 100, prefix=b'sibl')
-    sibl200 = get_para_address(app, 200, prefix=b'sibl')
+    sibl100 = get_para_address(app, 2000, prefix=b'sibl')
+    sibl200 = get_para_address(app, 2001, prefix=b'sibl')
 
     for (para,name) in [
-        (para100,             'para 100'),
-        (para200,             'para 200'),
-        (sibl100,             'sibl 100'),
-        (sibl200,             'sibl 200'),
+        (para100,             'para 2000'),
+        (para200,             'para 2001'),
+        (sibl100,             'sibl 2000'),
+        (sibl200,             'sibl 2001'),
         (dev.ss58_address,    'Device'),
         (root.ss58_address,   'Alice'),
         (bob.ss58_address,    'Bob'),
@@ -375,100 +365,14 @@ def account_info(app):
             continue
         print(f"'{name}' ({para}) balance {result.value['data']['free']} ")
 
-if __name__=="__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description='substrate command line.')
-    parser.add_argument('command', help='endow register, account_info configure order complete')
-    parser.add_argument('--ws_url', help='websocker url', nargs='*', default=['ws://localhost:9950/'] )
-    parser.add_argument('--amount', help='tokens amount', type=int, default=10_000_000_000_000)
-    parser.add_argument('--paraid', help='parachain id', nargs='*', type=int, default=[100] )
-    parser.add_argument('--account', help='account uri (i.e  //Bob)', type=str, default='//Bob' )
-    parser.add_argument('--dev', help='device name', type=str, default='//Device//1' )
-    parser.add_argument('--wasm', help='wasm file')
-    parser.add_argument('--genesis', help='genesis file')
 
-    args = parser.parse_args()
-
-    url = args.ws_url[0]
-    print(f"connect to node by {url}")
-    cmd = args.command
-    dev = Keypair.create_from_uri( args.dev )
-
-    substrate = SubstrateInterface(
-       url=url,
-       ss58_format=42,
-       type_registry_preset='rococo',
-       type_registry={'types': CUSTOM_TYPES }
-    )
-    substrate.update_type_registry_presets()
-
-    if cmd=="endow":
-        # (substrate instance ,paraid , account to transfer)
-        # endow 1000 Unit for each parachain account in relay chain
-        endow(substrate, get_para_address(substrate,100), args.amount)
-        endow(substrate, get_para_address(substrate,200), args.amount)
-
-    elif cmd=="endow_para":
-
-        endow(substrate, get_para_address(substrate, args.paraid[0], prefix=b'sibl'), args.amount )
-
-    elif cmd=="register":
-        # (substrate instance ,paraid , wasm , genesis)
-        register(substrate, args.paraid[0], args.wasm , args.genesis )
-
-    elif cmd=="hrmp_open":
-        # (substrate instance ,paraid from , paraid to)
-        if len(args.paraid) != 2:
-            sys.exit(1)
-
-        hrmp_open(substrate, args.paraid[0], args.paraid[1] )
-
-    elif cmd=="ump":
-        if len(sys.argv) == 4:
-            msg = open(sys.argv[3]).read()
-        else:
-            msg = '0x04000090b5ab205c6974c9ea841be688864633dc9ca8a357843eeacf2314649965fe220b00f0ab75a40d'
-        ump(substrate, msg)
-
-    elif cmd=="hrmp":
-        if len(sys.argv) == 5:
-            msg = open(sys.argv[4]).read()
-        else:
-            msg = '0x02000090b5ab205c6974c9ea841be688864633dc9ca8a357843eeacf2314649965fe220b0060b7986c88'
+substrate = SubstrateInterface(
+   url="ws://localhost:9944/",
+   ss58_format=42,
+   type_registry_preset='rococo',
+   type_registry={'types': CUSTOM_TYPES }
+)
+substrate.update_type_registry_presets()
 
 
-        hrmp(substrate, args.paraid[0], msg )
-
-    elif cmd=="account_info":
-        account_info(substrate)
-
-    elif cmd=="show_call":
-        show_call(substrate, args.amount )
-
-    elif cmd=="configure":
-        config_device(substrate, args.amount )
-        if len(args.ws_url)>1:
-            url = args.ws_url[1]
-            substrate = SubstrateInterface(
-               url=url,
-               ss58_format=42,
-               type_registry_preset='rococo',
-               type_registry={'types': CUSTOM_TYPES }
-            )
-            config_device_srv(substrate, args.amount )
-
-    elif cmd=="order":
-        order(substrate, Keypair.create_from_uri(args.account),  args.amount )
-
-    elif cmd=="order_reject":
-        reject( substrate )
-
-    elif cmd=="order_done":
-        done( substrate )
-
-    elif cmd=="configure__":
-        config_device_srv(substrate, args.amount )
-
-    else:
-        print(f"unknown command '{cmd}'")
-        print_usage()
+config_device(substrate, 100_000_000_000)

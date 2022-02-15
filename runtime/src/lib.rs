@@ -597,6 +597,14 @@ impl pallet_xchange::Config for Runtime {
     type Currency = Balances;
 }
 
+impl cumulus_ping::Config for Runtime {
+	type Event = Event;
+	type Origin = Origin;
+	type Call = Call;
+	type XcmSender = XcmRouter;
+}
+
+
 pub struct AcceptOnReceive;
 impl<T: pallet_xchange_service::Config> pallet_xchange_service::OnReceived<T> for AcceptOnReceive {
     fn on_received(
@@ -648,11 +656,14 @@ construct_runtime!(
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 33,
 
 		// Template
-		TemplatePallet: pallet_template::{Pallet, Call, Storage, Event<T>}  = 40,
+		TemplatePallet: pallet_template::{Pallet, Call, Storage, Event<T>}  = 91,
 
-		XchangePallet: pallet_xchange::{Pallet, Call, Storage, Event<T>}  = 41,
+		XchangePallet: pallet_xchange::{Pallet, Call, Storage, Event<T>}  = 92,
 
-		XchangeService: pallet_xchange_service::{Pallet, Call, Storage, Event<T>}  = 42,
+		XchangeService: pallet_xchange_service::{Pallet, Call, Storage, Event<T>}  = 93,
+
+		Spambot: cumulus_ping::{Pallet, Call, Storage, Event<T>} = 94,
+
 
 	}
 );

@@ -13,8 +13,8 @@ use frame_support::{
 	traits::{BalanceStatus::Free, Currency, Get, ReservableCurrency},
 };
 
-use xcm::latest::{prelude::*, Junction, MultiLocation, OriginKind, SendXcm, Xcm};
 use cumulus_primitives_core::ParaId;
+use xcm::latest::{prelude::*, Junction, MultiLocation, OriginKind, SendXcm, Xcm};
 
 use frame_support::traits::OnKilledAccount;
 pub use pallet::*;
@@ -27,8 +27,8 @@ use frame_support::serde::{Deserialize, Serialize};
 use sp_std::convert::{TryFrom, TryInto};
 
 use cumulus_primitives_core::{
-	relay_chain, relay_chain::BlockNumber as RelayBlockNumber, ServiceQuality,
-	XcmpMessageFormat, XcmpMessageHandler,
+	relay_chain, relay_chain::BlockNumber as RelayBlockNumber, ServiceQuality, XcmpMessageFormat,
+	XcmpMessageHandler,
 };
 
 use xcm::VersionedXcm;
@@ -85,9 +85,9 @@ pub mod pallet {
 	#[scale_info(skip_type_params(T))]
 	pub struct DeviceProfile<T: Config> {
 		pub penalty: BalanceOf<T>,
-		pub work_duration: MomentOf<T>,
+		pub wcd: MomentOf<T>,
 		pub para_id: ParaId,
-		pub device_state: DeviceState,
+		pub state: DeviceState,
 	}
 
 	#[pallet::pallet]
@@ -162,10 +162,10 @@ pub mod pallet {
 			};
 			let mut dev = Device::<T>::get(&order.device).ok_or(Error::<T>::NoDevice)?;
 
-			if dev.device_state != DeviceState::Ready {
+			if dev.state != DeviceState::Ready {
 				return Err(Error::<T>::IllegalState.into());
 			}
-			if order.until < (now + dev.work_duration) {
+			if order.until < (now + dev.wcd) {
 				return Err(Error::<T>::BadOrderDetails.into());
 			};
 			if !T::Currency::can_reserve(&who, order.fee) {
@@ -194,7 +194,7 @@ pub mod pallet {
 				.map_err(|_| Error::<T>::CannotReachDestination)
 				.map(|_| ());
 			log::info!("XCM order message has sent");
-			dev.device_state = DeviceState::Busy;
+			dev.state = DeviceState::Busy;
 			Device::<T>::insert(&device, &dev);
 
 			Self::deposit_event(Event::NewOrder(who, device.clone()));
@@ -237,9 +237,9 @@ pub mod pallet {
 			Device::<T>::insert(
 				&id,
 				DeviceProfile {
-					work_duration: wcd,
+					wcd,
 					penalty,
-					device_state: if onoff { DeviceState::Ready } else { DeviceState::Off },
+					state: if onoff { DeviceState::Ready } else { DeviceState::Off },
 					para_id: paraid,
 				},
 			);
@@ -261,7 +261,7 @@ impl<T: Config> Pallet<T> {
 		let now = Timestamp::<T>::get();
 		let mut dev = Device::<T>::get(&device).ok_or(Error::<T>::NoDevice)?;
 
-		dev.device_state = if !onoff { DeviceState::Off } else { DeviceState::Ready };
+		dev.state = if !onoff { DeviceState::Off } else { DeviceState::Ready };
 
 		Self::order_reject(who, &order, now, device, &mut dev)
 	}
@@ -280,7 +280,7 @@ impl<T: Config> Pallet<T> {
 		}
 		Orders::<T>::remove(&device);
 
-		dev.device_state = if !onoff { DeviceState::Off } else { DeviceState::Ready };
+		dev.state = if !onoff { DeviceState::Off } else { DeviceState::Ready };
 
 		Device::<T>::insert(&device, &dev);
 		Self::deposit_event(Event::Done(who, device));
@@ -313,10 +313,10 @@ impl<T: Config> OnKilledAccount<T::AccountId> for Pallet<T> {
 	fn on_killed_account(who: &T::AccountId) {
 		//Timewait
 		if let Some(mut dev) = Device::<T>::get(who) {
-			if dev.device_state == DeviceState::Off {
+			if dev.state == DeviceState::Off {
 				Device::<T>::remove(who);
 			} else {
-				dev.device_state = DeviceState::Timewait;
+				dev.state = DeviceState::Timewait;
 				Device::<T>::insert(who, dev);
 			}
 		}

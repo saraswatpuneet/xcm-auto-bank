@@ -72,6 +72,7 @@ cumulus-primitives-utility = { git = 'https://github.com/paritytech/cumulus', br
 pallet-collator-selection = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.15', default-features = false }
 parachain-info = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.15', default-features = false }
 cumulus-pallet-session-benchmarking = { git = "https://github.com/paritytech/cumulus", branch = "polkadot-v0.9.15",  default-features = false, version = "3.0.0"}
+cumulus-ping = { git = 'https://github.com/paritytech/cumulus', branch = 'polkadot-v0.9.15', default-features = false }
 
 # Polkadot Dependencies
 pallet-xcm = { git = "https://github.com/paritytech/polkadot", default-features = false , branch = "release-v0.9.15" }
@@ -132,6 +133,7 @@ std = [
 	"xcm-builder/std",
 	"xcm-executor/std",
 	"xcm/std",
+	"cumulus-ping/std",
 ]
 
 runtime-benchmarks = [

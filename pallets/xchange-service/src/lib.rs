@@ -82,7 +82,6 @@ pub mod pallet {
 		type Currency: ReservableCurrency<Self::AccountId>;
 
 		type OrderPayload: Encode + Decode + Clone + Default + Parameter + TypeInfo;
-		
 		type SelfParaId: Get<ParaId>;
 
 		type XcmpMessageSender: SendXcm;
@@ -95,8 +94,8 @@ pub mod pallet {
 	#[scale_info(skip_type_params(T))]
 	pub struct DeviceProfile<T: Config> {
 		pub penalty: BalanceOf<T>,
-		pub work_duration: MomentOf<T>,
-		pub device_state: DeviceState,
+		pub wcd: MomentOf<T>,
+		pub state: DeviceState,
 	}
 
 	#[pallet::pallet]
@@ -180,13 +179,13 @@ pub mod pallet {
 
 			let now = Timestamp::<T>::get();
 			if reject {
-				if !matches!(dev.device_state, DeviceState::Busy | DeviceState::Accepted) {
+				if !matches!(dev.state, DeviceState::Busy | DeviceState::Accepted) {
 					return Err(Error::<T>::IllegalState.into());
 				}
-				dev.device_state = if onoff { DeviceState::Ready } else { DeviceState::Off };
+				dev.state = if onoff { DeviceState::Ready } else { DeviceState::Off };
 				return Self::order_reject(order.as_ref(), now, id, &mut dev, onoff);
 			}
-			if dev.device_state != DeviceState::Busy {
+			if dev.state != DeviceState::Busy {
 				return Err(Error::<T>::IllegalState.into());
 			}
 			let order = order.ok_or(Error::<T>::NoOrder)?;
@@ -204,7 +203,7 @@ pub mod pallet {
 
 			let mut dev = Device::<T>::get(&id).ok_or(Error::<T>::NoDevice)?;
 
-			if dev.device_state != DeviceState::Accepted {
+			if dev.state != DeviceState::Accepted {
 				return Err(Error::<T>::IllegalState.into());
 			}
 
@@ -231,9 +230,9 @@ pub mod pallet {
 			Device::<T>::insert(
 				&id,
 				DeviceProfile {
-					work_duration: wcd,
+					wcd,
 					penalty,
-					device_state: if onoff { DeviceState::Ready } else { DeviceState::Off },
+					state: if onoff { DeviceState::Ready } else { DeviceState::Off },
 				},
 			);
 			Self::deposit_event(Event::NewDevice(id));
@@ -246,7 +245,7 @@ pub mod pallet {
 
 			Device::<T>::try_mutate(&id, |d| {
 				if let Some(ref mut dev) = d {
-					dev.device_state = match (onoff, &dev.device_state) {
+					dev.state = match (onoff, &dev.state) {
 						(false, DeviceState::Ready | DeviceState::Off) => DeviceState::Off,
 						//(false, DeviceState::Busy2 | DeviceState::Standby) => DeviceState::Standby,
 						(true, DeviceState::Off) => DeviceState::Ready,
@@ -273,18 +272,17 @@ impl<T: Config> Pallet<T> {
 		}
 
 		let mut dev = Device::<T>::get(&device).ok_or(Error::<T>::NoDevice)?;
-		if dev.device_state != DeviceState::Ready {
+		if dev.state != DeviceState::Ready {
 			return Err(Error::<T>::IllegalState.into());
 		}
 
-		if order.until < (now + dev.work_duration) {
+		if order.until < (now + dev.wcd) {
 			return Err(Error::<T>::BadOrderDetails.into());
 		}
 
-		dev.device_state =
-			T::OnReceived::on_received(&device, &order).ok_or(Error::<T>::IllegalState)?;
+		dev.state = T::OnReceived::on_received(&device, &order).ok_or(Error::<T>::IllegalState)?;
 
-		debug_assert!(matches!(dev.device_state, DeviceState::Busy | DeviceState::Accepted));
+		debug_assert!(matches!(dev.state, DeviceState::Busy | DeviceState::Accepted));
 
 		if order.paraid == T::SelfParaId::get() {
 			if !T::Currency::can_reserve(&order.client, order.fee) {
@@ -297,7 +295,7 @@ impl<T: Config> Pallet<T> {
 		Orders::<T>::insert(&device, &order);
 		Self::deposit_event(Event::NewOrder(device.clone()));
 
-		if dev.device_state == DeviceState::Accepted {
+		if dev.state == DeviceState::Accepted {
 			Self::order_accept(&order, now, device, &mut dev);
 		} else {
 			Device::<T>::insert(&device, &dev);
@@ -311,7 +309,7 @@ impl<T: Config> Pallet<T> {
 		dev: &mut DeviceProfile<T>,
 		onoff: bool,
 	) -> DispatchResult {
-		dev.device_state = if onoff { DeviceState::Ready } else { DeviceState::Off };
+		dev.state = if onoff { DeviceState::Ready } else { DeviceState::Off };
 
 		let para_id = T::SelfParaId::get();
 		Device::<T>::insert(&device, &*dev);
@@ -353,7 +351,7 @@ impl<T: Config> Pallet<T> {
 		device: T::AccountId,
 		dev: &mut DeviceProfile<T>,
 	) {
-		dev.device_state = DeviceState::Accepted;
+		dev.state = DeviceState::Accepted;
 		Device::<T>::insert(&device, &*dev);
 		let para_id = T::SelfParaId::get();
 
@@ -421,7 +419,7 @@ impl<T: Config> Pallet<T> {
 impl<T: Config> OnKilledAccount<T::AccountId> for Pallet<T> {
 	fn on_killed_account(who: &T::AccountId) {
 		if let Some(dev) = Device::<T>::get(who) {
-			if dev.device_state == DeviceState::Off {
+			if dev.state == DeviceState::Off {
 				Device::<T>::remove(who);
 			}
 		}
